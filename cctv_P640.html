@@ -1,0 +1,157 @@
+<html><head>
+	<meta http-equiv="refresh" content="60">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <meta name="referrer" content="no-referrer">
+    <title>Varadise Player</title>
+    <style type="text/css">
+      body, html {
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: black; /* Set the background color to black */
+        color: white; /* Set default text color to white */
+      }
+      .player-container {
+        width: 30%; /* Adjust width for 3 columns */
+        margin: 1vw; /* Space between players */
+        text-align: center; /* Center text */
+      }
+      .grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 100%;
+      }
+      .nav-buttons {
+        margin-top: 20px;
+      }
+      button {
+        padding: 10px 20px;
+        margin: 0 5px;
+        background-color: #444; /* Darker button background */
+        color: white; /* Button text color */
+        border: none; /* Remove border */
+        cursor: pointer; /* Pointer cursor */
+      }
+      button:hover {
+        background-color: #666; /* Change button color on hover */
+      }
+      .title {
+        margin-bottom: 5px; /* Space between title and player */
+      }
+      .title-wrapper {
+        display: flex;
+        flex-direction: column; /* Stack title and player vertically */
+        align-items: center; /* Center title and player */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="grid" id="playerGrid"></div>
+
+    <div class="nav-buttons">
+      <button id="prevPage">Previous</button>
+      <button id="nextPage">Next</button>
+    </div>
+
+    <link rel="stylesheet" href="https://unpkg.byted-static.com/xgplayer/3.0.10/dist/index.min.css">
+    <script charset="utf-8" src="https://unpkg.byted-static.com/xgplayer/3.0.10/dist/index.min.js"></script>
+    <script charset="utf-8" src="https://unpkg.byted-static.com/xgplayer-flv/3.0.10/dist/index.min.js"></script>
+    <script>
+      const playerUrls = [
+"https://iv0f1bo0hx5zc083.pull.aiotvideo.volces.com/rbl5p64wl4cusxng/KTA-Cam01-HD.flv",
+"https://iv0f1bo0hx5zc083.pull.aiotvideo.volces.com/rbl5p64wl4cusxng/KTA-Cam02-LZ.flv",
+"https://iv0f1bo0hx5zc083.pull.aiotvideo.volces.com/rbl5p64wl4cusxng/KTA-Cam03-LZ.flv",
+"https://iv0f1bo0hx5zc083.pull.aiotvideo.volces.com/rbl5p64wl4cusxng/KTA-Cam04-HD.flv",
+"https://iv0f1bo0hx5zc083.pull.aiotvideo.volces.com/rbl5p64wl4cusxng/KTA-Cam05-HD.flv",
+"https://iv0f1bo0hx5zc083.pull.aiotvideo.volces.com/rbl5p64wl4cusxng/KTA-Cam06-HD.flv"	
+      ];
+
+      const playerTitles = [
+     "KTA-Cam01-HD",
+"KTA-Cam02-LZ",
+"KTA-Cam03-LZ",
+"KTA-Cam04-HD",
+"KTA-Cam05-HD",
+"KTA-Cam06-HD"
+
+      ];
+
+      let currentPage = 0;
+      const playersPerPage = 6;
+
+      function loadPlayers() {
+        const grid = document.getElementById('playerGrid');
+        grid.innerHTML = ''; // Clear the grid before loading new players
+
+        const start = currentPage * playersPerPage;
+        const end = start + playersPerPage;
+        const currentUrls = playerUrls.slice(start, end);
+        const currentTitles = playerTitles.slice(start, end); // Get titles for the current page
+
+        currentUrls.forEach((url, index) => {
+          const playerContainer = document.createElement('div');
+          playerContainer.className = 'player-container';
+
+          // Create title wrapper
+          const titleWrapper = document.createElement('div');
+          titleWrapper.className = 'title-wrapper';
+
+          // Create title element
+          const titleElement = document.createElement('div');
+          titleElement.className = 'title';
+          titleElement.innerText = currentTitles[index]; // Set title from the titles array
+
+          // Create the player element
+          const videoElement = document.createElement('div');
+          videoElement.id = `mse${start + index + 1}`; // Unique ID for each player
+
+          titleWrapper.appendChild(titleElement); // Append title to the title wrapper
+          titleWrapper.appendChild(videoElement); // Append video element to the title wrapper
+          playerContainer.appendChild(titleWrapper); // Append title wrapper to the player container
+          grid.appendChild(playerContainer); // Add player container to the grid
+
+          const config = {
+            id: videoElement.id,
+            url: url,
+            playsinline: true,
+            poster: "https://www.example.com/your-poster.jpg", // Update with a valid poster URL
+            plugins: [],
+            isLive: true,
+            autoplayMuted: true,
+            autoplay: true,
+            useCssFullscreen: true
+          };
+          config.plugins.push(FlvPlayer);
+          new Player(config); // Initialize the player
+        });
+      }
+
+      function updateButtons() {
+        document.getElementById('prevPage').disabled = currentPage === 0;
+        document.getElementById('nextPage').disabled = (currentPage + 1) * playersPerPage >= playerUrls.length;
+      }
+
+      document.getElementById('prevPage').addEventListener('click', () => {
+        if (currentPage > 0) {
+          currentPage--;
+          loadPlayers();
+          updateButtons();
+        }
+      });
+
+      document.getElementById('nextPage').addEventListener('click', () => {
+        if ((currentPage + 1) * playersPerPage < playerUrls.length) {
+          currentPage++;
+          loadPlayers();
+          updateButtons();
+        }
+      });
+
+      loadPlayers(); // Initial load of players
+      updateButtons(); // Update button states
+    </script>
+  
+</body></html>

@@ -1,0 +1,173 @@
+<html>
+<head>
+	<meta http-equiv="refresh" content="60">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <meta name="referrer" content="no-referrer">
+    <title>Varadise Player</title>
+    <style type="text/css">
+      body, html {
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: black;
+        color: white;
+      }
+      .player-container {
+        width: 30%;
+        margin: 10px;
+        text-align: center;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+      }
+      .grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 100%;
+      }
+      .nav-buttons {
+        margin-top: 20px;
+      }
+      button {
+        padding: 10px 20px;
+        margin: 0 5px;
+        background-color: #444;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #666;
+      }
+      .title {
+        margin-bottom: 5px;
+      }
+      .title-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+    </style>
+</head>
+<body>
+    <div class="grid" id="playerGrid"></div>
+
+    <div class="nav-buttons">
+      <button id="prevPage">Previous</button>
+      <button id="nextPage">Next</button>
+    </div>
+
+    <link rel="stylesheet" href="https://unpkg.byted-static.com/xgplayer/3.0.10/dist/index.min.css">
+    <script charset="utf-8" src="https://unpkg.byted-static.com/xgplayer/3.0.10/dist/index.min.js"></script>
+    <script charset="utf-8" src="https://unpkg.byted-static.com/xgplayer-flv/3.0.10/dist/index.min.js"></script>
+    <script charset="utf-8" src="https://unpkg.byted-static.com/xgplayer-hls/3.0.10/dist/index.min.js"></script>
+    <script>
+      const playerUrls = [
+        "https://azwn132t0vx1ad6g.pull.aiotvideo.volces.com/hvriz248dk830t6h/Cam1.flv",
+        "https://azwn132t0vx1ad6g.pull.aiotvideo.volces.com/hvriz248dk830t6h/Cam2.flv",
+        "https://azwn132t0vx1ad6g.pull.aiotvideo.volces.com/hvriz248dk830t6h/Cam5.flv",
+        "https://azwn132t0vx1ad6g.pull.aiotvideo.volces.com/hvriz248dk830t6h/Cam4.flv",
+        "https://azwn132t0vx1ad6g.pull.aiotvideo.volces.com/hvriz248dk830t6h/Cam7.flv",
+        "https://azwn132t0vx1ad6g.pull.aiotvideo.volces.com/hvriz248dk830t6h/Cam10.flv",
+        "https://cctv-hub2.varadise.cloud/stream/hls/group/DXNYTrwjWc/hls.m3u8",
+        "https://cctv-hub2.varadise.cloud/stream/hls/group/UcwfRZfOJF/hls.m3u8",
+
+
+
+      ];
+
+      const playerTitles = [
+        "C7-CAM 1-CCTV",
+        "C7-CAM 2-CCTV",
+        "C7-CAM 5-CCTV",
+	"C7-CAM 4-CCTV",
+        "C7-CAM 7-CCTV",
+        "C7-CAM 10-CCTV",
+	"C7-CAM 8- I-Vision 360",
+	"C7-CAM 3-CCTV"
+
+
+      ];
+
+      let currentPage = 0;
+      const playersPerPage = 6;
+
+      function loadPlayers() {
+        const grid = document.getElementById('playerGrid');
+        grid.innerHTML = '';
+
+        const start = currentPage * playersPerPage;
+        const end = start + playersPerPage;
+        const currentUrls = playerUrls.slice(start, end);
+        const currentTitles = playerTitles.slice(start, end);
+
+        currentUrls.forEach((url, index) => {
+          const playerContainer = document.createElement('div');
+          playerContainer.className = 'player-container';
+
+          const titleWrapper = document.createElement('div');
+          titleWrapper.className = 'title-wrapper';
+
+          const titleElement = document.createElement('div');
+          titleElement.className = 'title';
+          titleElement.innerText = currentTitles[index];
+
+          const videoElement = document.createElement('div');
+          videoElement.id = `mse${start + index + 1}`;
+
+          titleWrapper.appendChild(titleElement);
+          titleWrapper.appendChild(videoElement);
+          playerContainer.appendChild(titleWrapper);
+          grid.appendChild(playerContainer);
+
+          // Create player config
+          const config = {
+            id: videoElement.id,
+            url: url,
+            playsinline: true,
+            poster: "https://www.example.com/your-poster.jpg", // Update to your poster image if needed
+            isLive: true,
+            autoplayMuted: true,
+            autoplay: true,
+            useCssFullscreen: true,
+            plugins: []
+          };
+
+          // Check file extension to choose the correct player
+          if (url.endsWith('.flv')) {
+            config.plugins.push(FlvPlayer);
+            new Player(config);
+          } else if (url.endsWith('.m3u8')) {
+            config.plugins.push(HlsPlayer);
+            new Player(config);
+          }
+        });
+      }
+
+      function updateButtons() {
+        document.getElementById('prevPage').disabled = currentPage === 0;
+        document.getElementById('nextPage').disabled = (currentPage + 1) * playersPerPage >= playerUrls.length;
+      }
+
+      document.getElementById('prevPage').addEventListener('click', () => {
+        if (currentPage > 0) {
+          currentPage--;
+          loadPlayers();
+          updateButtons();
+        }
+      });
+
+      document.getElementById('nextPage').addEventListener('click', () => {
+        if ((currentPage + 1) * playersPerPage < playerUrls.length) {
+          currentPage++;
+          loadPlayers();
+          updateButtons();
+        }
+      });
+
+      loadPlayers();
+      updateButtons();
+    </script>
+</body>
+</html>
