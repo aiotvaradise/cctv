@@ -1,42 +1,6 @@
 [
 
-{"username": "00000000210000015969", "cmd": "man", "Cam Name":"P415 Cam04"},
-{"username": "00000000210000015630", "cmd": "man", "Cam Name":"P415 Cam06"},
-{"username": "00000000210000015629", "cmd": "man", "Cam Name":"P415 Cam07"},
-{"username": "00000000210000015443", "cmd": "man", "Cam Name":"P415 Cam11"},
-{"username": "00000000210000015946", "cmd": "man", "Cam Name":"P415 Cam28"},
-{"username": "00000000210000017674", "cmd": "man", "Cam Name":"P415 Cam20"},
 
-{"username": "00000000210000015893", "cmd": "man", "Cam Name":"P418 Cam08"},
-{"username": "00000000210000012717", "cmd": "man", "Cam Name":"P418 Cam17"},
-{"username": "00000000210000015820", "cmd": "man", "Cam Name":"P418 Cam15"},
-{"username": "00000000210000015822", "cmd": "man", "Cam Name":"P418 Cam22"},
-{"username": "00000000210000015725", "cmd": "auto", "Cam Name":"P418 Cam09"},
-
-{"username": "00000000210000015860", "cmd": "man", "Cam Name":"P419 Cam 15"},
-
-{"username": "00000000210000015837", "cmd": "man", "Cam Name":"P421 Cam04"},
-{"username": "00000000210000015828", "cmd": "man", "Cam Name":"P421 Cam10"},
-
-{"username": "00000000210000015432", "cmd": "man", "Cam Name":"P433 Cam15"},
-{"username": "00000000210000015625", "cmd": "man", "Cam Name":"P433 Cam17"},
-{"username": "00000000210000015431", "cmd": "man", "Cam Name":"P433 Cam19"},
-{"username": "00000000210000015626", "cmd": "man", "Cam Name":"P433 Cam28"},
-{"username": "00000000210000015413", "cmd": "man", "Cam Name":"P433 Cam20"},
-{"username": "00000000210000015839", "cmd": "man", "Cam Name":"P433 Cam22"},
-
-{"username": "00000000210000017562", "cmd": "man", "Cam Name":"P435 Cam05"},
-
-{"username": "00000000210000015979", "cmd": "man", "Cam Name":"P436 TCR4"},
-{"username": "00000000210000015975", "cmd": "man", "Cam Name":"P436 TCR5"},
-
-
-{"username": "00000000210000016677", "cmd": "man", "Cam Name":"P478 Cam02"},
-
-{"username": "00000000210000015353", "cmd": "man","Cam Name":"P495 Cam11"},
-{"username": "00000000210000015614", "cmd": "man","Cam Name":"P495 Cam07"},
-{"username": "00000000210000016008", "cmd": "man","Cam Name":"P495 Cam05"},
-{"username": "00000000210000017673", "cmd": "man","Cam Name":"P495 Cam08"},
 
 {"username": "00000000210000016509", "cmd": "man","Cam Name":"P643 Cam01"},
 {"username": "00000000210000016507", "cmd": "man","Cam Name":"P643 Cam02"}
