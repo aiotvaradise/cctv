@@ -1,0 +1,164 @@
+<html>
+<head>
+    <meta http-equiv="refresh" content="60">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <meta name="referrer" content="no-referrer">
+    <title>Varadise Player</title>
+    <style type="text/css">
+        /* Keep existing styles the same */
+        body, html { margin: 0; padding: 0 0 60px 0; height: 100%; background-color: black; color: white; }
+        .grid { display: grid; gap: 10px; padding: 10px; width: 100%; box-sizing: border-box; min-height: calc(100vh - 80px); margin-bottom: 20px; }
+        .player-container { position: relative; width: 100%; aspect-ratio: 1/1; background-color: #000; border-radius: 4px; overflow: hidden; }
+        .video-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
+        .title { position: absolute; top: 0; left: 0; right: 0; background: rgba(0, 0, 0, 0.7); padding: 5px; font-size: 12px; z-index: 1; }
+        .nav-buttons { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0, 0, 0, 0.8); padding: 10px; text-align: center; height: 60px; display: flex; justify-content: center; align-items: center; gap: 20px; z-index: 1000; }
+        button { padding: 8px 16px; background-color: #444; color: white; border: none; border-radius: 4px; cursor: pointer; min-width: 100px; }
+        button:hover { background-color: #666; }
+        button:disabled { background-color: #333; cursor: not-allowed; }
+        .page-info { color: #fff; font-size: 14px; margin: 0 15px; }
+        .xgplayer, .xgplayer-container, .xgplayer-embed { width: 100% !important; height: 100% !important; }
+        .xgplayer video { object-fit: contain !important; background: #000 !important; }
+        .loading { text-align: center; padding: 20px; color: #888; }
+        .error { color: #ff4444; text-align: center; padding: 20px; }
+   </style>
+</head>
+<body>
+    <div class="grid" id="playerGrid">
+        <div class="loading">Loading CCTV streams...</div>
+    </div>
+    <div class="nav-buttons">
+        <button id="prevPage">Previous</button>
+        <span class="page-info" id="pageDisplay">Page 1 of 1</span>
+        <button id="nextPage">Next</button>
+    </div>
+
+    <link rel="stylesheet" href="https://unpkg.byted-static.com/xgplayer/3.0.10/dist/index.min.css">
+    <script charset="utf-8" src="https://unpkg.byted-static.com/xgplayer/3.0.10/dist/index.min.js"></script>
+    <script charset="utf-8" src="https://unpkg.byted-static.com/xgplayer-flv/3.0.10/dist/index.min.js"></script>
+    <script charset="utf-8" src="https://unpkg.byted-static.com/xgplayer-hls/3.0.10/dist/index.min.js"></script>
+    <script>
+        const layoutConfig = { columns: 2, rows: 1 };
+        const playersPerPage = layoutConfig.columns * layoutConfig.rows;
+        let currentPage = 0;
+        let playerData = [];
+
+        // Replace with your Apps Script URL
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbykuxu6mnhn3V_K5Zr7bAjiiFfGlADM6y6Ccb90CVLyaV0AVacYpxS4fFz5lEyoaArueg/exec';
+
+        async function fetchStreamData() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const projectId = urlParams.get('projectid');
+                
+                if (!projectId) throw new Error('Missing project ID in URL');
+                
+                const response = await fetch(`${SCRIPT_URL}?projectid=${encodeURIComponent(projectId)}`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const data = await response.json();
+                if (!data.length) throw new Error('No streams found for this project');
+                
+                playerData = data;
+                loadPlayers();
+                updateButtons();
+            } catch (error) {
+                document.getElementById('playerGrid').innerHTML = 
+                    `<div class="error">Error: ${error.message}</div>`;
+                console.error('Fetch error:', error);
+            }
+        }
+
+        function loadPlayers() {
+            const grid = document.getElementById('playerGrid');
+            grid.innerHTML = '';
+            grid.style.gridTemplateColumns = `repeat(${layoutConfig.columns}, 1fr)`;
+
+            const startIndex = currentPage * playersPerPage;
+            const endIndex = startIndex + playersPerPage;
+            const currentStreams = playerData.slice(startIndex, endIndex);
+
+            currentStreams.forEach((stream, index) => {
+                const playerContainer = document.createElement('div');
+                playerContainer.className = 'player-container';
+                
+                const titleElement = document.createElement('div');
+                titleElement.className = 'title';
+                titleElement.textContent = stream.playerTitles;
+
+                const videoWrapper = document.createElement('div');
+                videoWrapper.className = 'video-wrapper';
+                videoWrapper.id = `mse${startIndex + index + 1}`;
+
+                playerContainer.appendChild(titleElement);
+                playerContainer.appendChild(videoWrapper);
+                grid.appendChild(playerContainer);
+
+                initializePlayer(videoWrapper.id, stream.playerUrls);
+            });
+
+            // Fill empty slots if needed
+            const emptySlots = playersPerPage - currentStreams.length;
+            for (let i = 0; i < emptySlots; i++) {
+                const emptyContainer = document.createElement('div');
+                emptyContainer.className = 'player-container';
+                emptyContainer.style.backgroundColor = '#111';
+                grid.appendChild(emptyContainer);
+            }
+        }
+
+        function initializePlayer(containerId, streamUrl) {
+            const config = {
+                id: containerId,
+                url: streamUrl,
+                playsinline: true,
+                isLive: true,
+                autoplayMuted: true,
+                autoplay: true,
+                fluid: true,
+                useCssFullscreen: true,
+                videoAttributes: {
+                    style: "object-fit: contain; background: #000"
+                },
+                plugins: []
+            };
+
+            if (streamUrl.endsWith('.flv')) {
+                config.plugins.push(FlvPlayer);
+                new Player(config);
+            } else if (streamUrl.endsWith('.m3u8')) {
+                config.plugins.push(HlsPlayer);
+                new Player(config);
+            }
+        }
+
+        function updateButtons() {
+            const totalPages = Math.ceil(playerData.length / playersPerPage);
+            document.getElementById('prevPage').disabled = currentPage === 0;
+            document.getElementById('nextPage').disabled = currentPage >= totalPages - 1;
+            document.getElementById('pageDisplay').textContent = 
+                `Page ${currentPage + 1} of ${totalPages}`;
+        }
+
+        // Event Listeners
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (currentPage > 0) {
+                currentPage--;
+                loadPlayers();
+                updateButtons();
+            }
+        });
+
+        document.getElementById('nextPage').addEventListener('click', () => {
+            if (currentPage < Math.ceil(playerData.length / playersPerPage) - 1) {
+                currentPage++;
+                loadPlayers();
+                updateButtons();
+            }
+        });
+
+        // Initial load
+        fetchStreamData();
+    </script>
+</body>
+</html>
