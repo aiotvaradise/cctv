@@ -1,110 +1,189 @@
-<!DOCTYPE html>
 <html>
-  <head>
-    <meta http-equiv="refresh" content="60">
+<head>
+	<meta http-equiv="refresh" content="60">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
     <meta name="referrer" content="no-referrer">
-    <title>FLV Streaming</title>
+    <title>Varadise Player</title>
     <style type="text/css">
-      html, body {
-        width: 100%;
-        height: 100%;
+      body, html {
         margin: 0;
-        overflow: hidden;
-        font-family: Arial, sans-serif;
-      }
-      .container {
-        width: 100%;
-        height: 100%;
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
+        background-color: black;
+        color: white;
+      }
+      .player-container {
+        width: 30%;
+        margin: 10px;
         text-align: center;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+      }
+      .grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 100%;
+      }
+      .nav-buttons {
+        margin-top: 20px;
+      }
+      button {
+        padding: 10px 20px;
+        margin: 0 5px;
+        background-color: #444;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #666;
       }
       .title {
-        font-size: 1.5rem;
-        font-weight: bold;
-        margin-bottom: 10px;
+        margin-bottom: 5px;
       }
-      .navigation {
-        position: absolute;
-        bottom: 20px;
+      .title-wrapper {
         display: flex;
-        gap: 20px;
-      }
-      .navigation button {
-        padding: 10px 20px;
-        font-size: 1rem;
-        border: none;
-        border-radius: 5px;
-        background-color: #007BFF;
-        color: white;
-        cursor: pointer;
-        transition: background-color 0.3s;
-      }
-      .navigation button:hover {
-        background-color: #0056b3;
+        flex-direction: column;
+        align-items: center;
       }
     </style>
-    <link rel="stylesheet" href="https://unpkg.byted-static.com/xgplayer/3.0.10/dist/index.min.css" />
+</head>
+<body>
+    <div class="grid" id="playerGrid"></div>
+
+    <div class="nav-buttons">
+      <button id="prevPage">Previous</button>
+      <button id="nextPage">Next</button>
+    </div>
+
+    <link rel="stylesheet" href="https://unpkg.byted-static.com/xgplayer/3.0.10/dist/index.min.css">
     <script charset="utf-8" src="https://unpkg.byted-static.com/xgplayer/3.0.10/dist/index.min.js"></script>
     <script charset="utf-8" src="https://unpkg.byted-static.com/xgplayer-flv/3.0.10/dist/index.min.js"></script>
-  </head>
-  <body>
-    <div class="container">
-      <div class="title" id="page-title">Stream 1: Live Camera 1</div>
-      <div id="mse"></div>
-      <div class="navigation">
-        <button onclick="loadStream(1)">Page 1</button>
-        <button onclick="loadStream(2)">Page 2</button>
-        <button onclick="loadStream(3)">Page 3</button>
-      </div>
-    </div>
+    <script charset="utf-8" src="https://unpkg.byted-static.com/xgplayer-hls/3.0.10/dist/index.min.js"></script>
     <script>
-      const streams = [
-        {
-          title: "Page 1",
-          url: "https://1g775y9ivoe7jxgj.pull.aiotvideo.volces.com/l4iyr13hqzqd2ue1/cam1-6.flv"
-        },
-        {
-          title: "Page 2",
-          url: "https://1g775y9ivoe7jxgj.pull.aiotvideo.volces.com/l4iyr13hqzqd2ue1/cam7-12.flv"
-        },
-        {
-          title: "Page 3",
-          url: "https://1g775y9ivoe7jxgj.pull.aiotvideo.volces.com/l4iyr13hqzqd2ue1/cam13-16.flv"
-        }
+      const playerUrls = [
+        "https://1g775y9ivoe7jxgj.pull.aiotvideo.volces.com/l4iyr13hqzqd2ue1/MXplALXons.flv",
+"https://1g775y9ivoe7jxgj.pull.aiotvideo.volces.com/l4iyr13hqzqd2ue1/vVLblypyfa.flv",
+"https://1g775y9ivoe7jxgj.pull.aiotvideo.volces.com/l4iyr13hqzqd2ue1/GOhmAjeZBq.flv",
+"https://1g775y9ivoe7jxgj.pull.aiotvideo.volces.com/l4iyr13hqzqd2ue1/ogTDYZAcVM.flv",
+"https://1g775y9ivoe7jxgj.pull.aiotvideo.volces.com/l4iyr13hqzqd2ue1/pVjfodqCmt.flv",
+"https://1g775y9ivoe7jxgj.pull.aiotvideo.volces.com/l4iyr13hqzqd2ue1/vNcQSzhtYp.flv",
+"https://1g775y9ivoe7jxgj.pull.aiotvideo.volces.com/l4iyr13hqzqd2ue1/UQdINWiJpd.flv",
+"https://1g775y9ivoe7jxgj.pull.aiotvideo.volces.com/l4iyr13hqzqd2ue1/HJVjQdHNLI.flv",
+"https://1g775y9ivoe7jxgj.pull.aiotvideo.volces.com/l4iyr13hqzqd2ue1/qFKwSbrQXd.flv",
+"https://1g775y9ivoe7jxgj.pull.aiotvideo.volces.com/l4iyr13hqzqd2ue1/XWcozqQNKI.flv",
+"https://1g775y9ivoe7jxgj.pull.aiotvideo.volces.com/l4iyr13hqzqd2ue1/ZZHFqEYDKw.flv",
+"https://1g775y9ivoe7jxgj.pull.aiotvideo.volces.com/l4iyr13hqzqd2ue1/UMinEgxWnQ.flv",
+"https://1g775y9ivoe7jxgj.pull.aiotvideo.volces.com/l4iyr13hqzqd2ue1/pzeQroeIBZ.flv",
+"https://1g775y9ivoe7jxgj.pull.aiotvideo.volces.com/l4iyr13hqzqd2ue1/pfpbKcOgNH.flv",
+"https://1g775y9ivoe7jxgj.pull.aiotvideo.volces.com/l4iyr13hqzqd2ue1/fIAvACerXs.flv",
+"https://1g775y9ivoe7jxgj.pull.aiotvideo.volces.com/l4iyr13hqzqd2ue1/yvEFlxWRds.flv"
+
+
       ];
 
-      let player;
+      const playerTitles = [
+        "Hung Shing Temple, Ap Lei Chau Cam 01 - Front Hall of Main Hall",
+"Hung Shing Temple, Ap Lei Chau Cam 02 - Man Cheong",
+"Hung Shing Temple, Ap Lei Chau Cam 03 - Main Entrance",
+"Hung Shing Temple, Ap Lei Chau Cam 04 - Selling Area",
+"Hung Shing Temple, Ap Lei Chau Cam 05 - Rear Hall of Main Hall",
+"Hung Shing Temple, Ap Lei Chau Cam 06 - Selling Area",
+"Hung Shing Temple, Ap Lei Chau Cam 07 - Temple Keeper Room",
+"Tin Hau Temple, Aberdeen Cam 01 - Main Entrance Out",
+"Tin Hau Temple, Aberdeen Cam 02 - Main Entrance",
+"Tin Hau Temple, Aberdeen Cam 03 - Kwun Yum Hall",
+"Tin Hau Temple, Aberdeen Cam 04 - Main Hall",
+"Tin Hau Temple, Aberdeen Cam 05 - Tai Sui Hall",
+"Tin Hau Temple, Aberdeen Cam 06 - Wong Tai Sin Hall",
+"Tin Hau Temple, Aberdeen Cam 07 - Rear Entrance",
+"Shui Yuet Kung, Ap Lei Chau Cam 01 - Selling Area",
+"Shui Yuet Kung, Ap Lei Chau Cam 02 - Main Entrance"
 
-      function loadStream(index) {
-        const stream = streams[index - 1];
-        document.getElementById("page-title").textContent = stream.title;
 
-        if (player) {
-          player.destroy();
-        }
 
-        const config = {
-          id: "mse",
-          url: stream.url,
-          playsinline: true,
-          poster: "//cdn.prod.website-files.com/5dbfd0c08b3107b843917e24/62390c9833656e3389c2f45e_Varadise%20logo.png",
-          plugins: [],
-          isLive: true,
-          volume: 0,
-          autoplay: true,
-          fluid: true
-        };
-        config.plugins.push(FlvPlayer);
-        player = new Player(config);
+      ];
+
+      let currentPage = 0;
+      const playersPerPage = 6;
+
+      function loadPlayers() {
+        const grid = document.getElementById('playerGrid');
+        grid.innerHTML = '';
+
+        const start = currentPage * playersPerPage;
+        const end = start + playersPerPage;
+        const currentUrls = playerUrls.slice(start, end);
+        const currentTitles = playerTitles.slice(start, end);
+
+        currentUrls.forEach((url, index) => {
+          const playerContainer = document.createElement('div');
+          playerContainer.className = 'player-container';
+
+          const titleWrapper = document.createElement('div');
+          titleWrapper.className = 'title-wrapper';
+
+          const titleElement = document.createElement('div');
+          titleElement.className = 'title';
+          titleElement.innerText = currentTitles[index];
+
+          const videoElement = document.createElement('div');
+          videoElement.id = `mse${start + index + 1}`;
+
+          titleWrapper.appendChild(titleElement);
+          titleWrapper.appendChild(videoElement);
+          playerContainer.appendChild(titleWrapper);
+          grid.appendChild(playerContainer);
+
+          // Create player config
+          const config = {
+            id: videoElement.id,
+            url: url,
+            playsinline: true,
+            poster: "https://www.example.com/your-poster.jpg", // Update to your poster image if needed
+            isLive: true,
+            autoplayMuted: true,
+            autoplay: true,
+            useCssFullscreen: true,
+            plugins: []
+          };
+
+          // Check file extension to choose the correct player
+          if (url.endsWith('.flv')) {
+            config.plugins.push(FlvPlayer);
+            new Player(config);
+          } else if (url.endsWith('.m3u8')) {
+            config.plugins.push(HlsPlayer);
+            new Player(config);
+          }
+        });
       }
 
-      // Load the first stream by default
-      loadStream(1);
+      function updateButtons() {
+        document.getElementById('prevPage').disabled = currentPage === 0;
+        document.getElementById('nextPage').disabled = (currentPage + 1) * playersPerPage >= playerUrls.length;
+      }
+
+      document.getElementById('prevPage').addEventListener('click', () => {
+        if (currentPage > 0) {
+          currentPage--;
+          loadPlayers();
+          updateButtons();
+        }
+      });
+
+      document.getElementById('nextPage').addEventListener('click', () => {
+        if ((currentPage + 1) * playersPerPage < playerUrls.length) {
+          currentPage++;
+          loadPlayers();
+          updateButtons();
+        }
+      });
+
+      loadPlayers();
+      updateButtons();
     </script>
-  </body>
+</body>
 </html>
