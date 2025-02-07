@@ -1,0 +1,118 @@
+<html>
+<head>
+	<meta http-equiv="refresh" content="60">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <meta name="referrer" content="no-referrer">
+    <title>Varadise Player</title>
+    <style type="text/css">
+      body, html {
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: black;
+        color: white;
+      }
+      .player-container {
+        width: 30vw; /* Each player takes 30% of the viewport width */
+        margin: 1vw;
+        text-align: center;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+      }
+      .grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 100%;
+      }
+      .title {
+        margin-bottom: 5px;
+      }
+      .title-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+    </style>
+</head>
+<body>
+    <div class="grid" id="playerGrid"></div>
+
+    <link rel="stylesheet" href="https://unpkg.byted-static.com/xgplayer/3.0.10/dist/index.min.css">
+    <script charset="utf-8" src="https://unpkg.byted-static.com/xgplayer/3.0.10/dist/index.min.js"></script>
+    <script charset="utf-8" src="https://unpkg.byted-static.com/xgplayer-flv/3.0.10/dist/index.min.js"></script>
+    <script charset="utf-8" src="https://unpkg.byted-static.com/xgplayer-hls/3.0.10/dist/index.min.js"></script>
+    <script>
+      const playerUrls = [
+      "https://vhomw78issg1x0qb.pull.aiotvideo.volces.com/9k9ujjgq6ffp71qy/Cam01.flv",
+      "https://vhomw78issg1x0qb.pull.aiotvideo.volces.com/9k9ujjgq6ffp71qy/Cam02.flv"
+
+      ];
+
+      const playerTitles = [
+      "Kwu Tung DCS - Cam 01 - PPE Detection",
+      "Kwu Tung DCS - Cam 02 - PPE Detection"
+
+      ];
+
+      let currentPage = 0;
+      const playersPerPage = 6;
+
+      function loadPlayers() {
+        const grid = document.getElementById('playerGrid');
+        grid.innerHTML = '';
+
+        const start = currentPage * playersPerPage;
+        const end = start + playersPerPage;
+        const currentUrls = playerUrls.slice(start, end);
+        const currentTitles = playerTitles.slice(start, end);
+
+        currentUrls.forEach((url, index) => {
+          const playerContainer = document.createElement('div');
+          playerContainer.className = 'player-container';
+
+          const titleWrapper = document.createElement('div');
+          titleWrapper.className = 'title-wrapper';
+
+          const titleElement = document.createElement('div');
+          titleElement.className = 'title';
+          titleElement.innerText = currentTitles[index];
+
+          const videoElement = document.createElement('div');
+          videoElement.id = `mse${start + index + 1}`;
+
+          titleWrapper.appendChild(titleElement);
+          titleWrapper.appendChild(videoElement);
+          playerContainer.appendChild(titleWrapper);
+          grid.appendChild(playerContainer);
+
+          // Create player config
+          const config = {
+            id: videoElement.id,
+            url: url,
+            playsinline: true,
+            poster: "https://www.example.com/your-poster.jpg", // Update to your poster image if needed
+            isLive: true,
+            autoplayMuted: true,
+            autoplay: true,
+            useCssFullscreen: true,
+            width: '100%', // Make the video player fill its container
+            plugins: []
+          };
+
+          // Check file extension to choose the correct player
+          if (url.endsWith('.flv')) {
+            config.plugins.push(FlvPlayer);
+            new Player(config);
+          } else if (url.endsWith('.m3u8')) {
+            config.plugins.push(HlsPlayer);
+            new Player(config);
+          }
+        });
+      }
+
+      loadPlayers();
+    </script>
+</body>
+</html>
