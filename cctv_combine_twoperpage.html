@@ -22,36 +22,14 @@
       position: relative;
     }
 
-    .timer-container {
-      position: absolute;
-      left: 5vw;
-      bottom: 40px;
-      display: flex;
-      align-items: center;
-    }
-
-    .timer-label {
-      color: white;
-      margin-right: 5px;
-    }
-
-    .timer-input {
-      padding: 5px;
-      font-size: 12px;
-      width: 60px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      background-color: #ffffff;
-    }
-
     #stream-container {
       width: 90vw;
       max-width: 1800px;
       height: auto;
       display: grid;
       gap: 10px;
-      grid-template-rows: repeat(2, 1fr);
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(1, 1fr);
+      grid-template-columns: repeat(2, 1fr); /* Show 2 streams per page */
     }
 
     .stream {
@@ -65,7 +43,6 @@
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
       overflow: hidden;
       transition: transform 0.2s;
-      width: 45vw; /* Set your desired width */
     }
 
     .stream:hover {
@@ -89,7 +66,7 @@
     .pagination {
       display: flex;
       align-items: center;
-      margin: 20px 0;
+      margin: 10px 0; /* Reduced margin */
     }
 
     .page-button, .nav-button {
@@ -97,7 +74,7 @@
       color: white;
       border: none;
       border-radius: 5px;
-      padding: 12px 20px;
+      padding: 10px 15px; /* Adjusted padding */
       cursor: pointer;
       margin: 0 5px;
       transition: background-color 0.3s;
@@ -113,33 +90,24 @@
       cursor: not-allowed;
     }
 
-    .video-container {
-      position: relative;
+    .timer-container {
+      display: flex;
+      align-items: center;
+      margin-top: 5px; /* Reduced margin */
     }
 
-    .fullscreen-button {
-      background-color: #020202; 
-      color: white; 
-      border: none; 
-      border-radius: 5px; 
-      padding: 8px 12px;
-      cursor: pointer; 
-      position: absolute; 
-      bottom: 10px; 
-      right: 10px; 
-      transition: background-color 0.3s; 
-      font-size: 14px; 
+    .timer-label {
+      color: white;
+      margin-right: 5px;
     }
 
-    .fullscreen-button:hover {
-      background-color: #393939;
-    }
-
-    .error-message {
-      color: red;
-      font-size: 18px;
-      text-align: center;
-      margin: 20px;
+    .timer-input {
+      padding: 5px;
+      font-size: 12px;
+      width: 60px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #ffffff;
     }
 
     /* Dropdown styling */
@@ -149,12 +117,20 @@
       border: 1px solid #ccc;
       border-radius: 5px;
       background-color: #ffffff;
-      margin-left: 10px; /* Space between button and dropdown */
+      margin-left: 10px;
+    }
+
+    .error-message {
+      color: red;
+      font-size: 18px;
+      text-align: center;
+      margin: 20px;
     }
   </style>
 </head>
 <body>
   <div id="stream-container"></div>
+
   <div class="pagination">
     <button class="nav-button" id="prev-button">Previous</button>
     <button class="nav-button" id="next-button">Next</button>
@@ -169,8 +145,7 @@
   <script src="https://unpkg.byted-static.com/xgplayer/3.0.10/dist/index.min.js"></script>
   <script src="https://unpkg.byted-static.com/xgplayer-flv/3.0.10/dist/index.min.js"></script>
   <script>
-    const layout = { rows: 1, columns: 2 };
-    const streamsPerPage = layout.rows * layout.columns;
+    const streamsPerPage = 2; // Set to show 2 streams per page
     let currentPage = 0;
     let streams = [];
     let timerInterval;
@@ -228,19 +203,8 @@
         videoContainer.className = "video-container";
         videoContainer.id = stream.id;
 
-        const fullscreenButton = document.createElement("button");
-        fullscreenButton.className = "fullscreen-button";
-        fullscreenButton.textContent = "[ ]";
-
-        fullscreenButton.addEventListener("click", () => {
-          if (videoContainer.requestFullscreen) {
-            videoContainer.requestFullscreen();
-          }
-        });
-
         streamDiv.appendChild(streamName);
         streamDiv.appendChild(videoContainer);
-        videoContainer.appendChild(fullscreenButton);
         container.appendChild(streamDiv);
 
         const config = {
