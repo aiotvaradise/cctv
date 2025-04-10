@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="referrer" content="no-referrer">
+  <title>Varadise Streaming</title>
+  <link rel="stylesheet" href="https://unpkg.byted-static.com/xgplayer/3.0.10/dist/index.min.css" />
+  <style type="text/css">
+    /* Basic styling for the HTML and body */
+    html, body {
+      width: 100%;
+      height: auto;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-color: #121212;
+      font-family: 'Arial', sans-serif;
+      padding: 10px;
+      position: relative;
+    }
+
+    .timer-container {
+      position: absolute;
+      left: 5vw;
+      bottom: 40px;
+      display: flex;
+      align-items: center;
+    }
+
+    .timer-label {
+      color: white;
+      margin-right: 5px;
+    }
+
+    .timer-input {
+      padding: 5px;
+      font-size: 12px;
+      width: 60px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #ffffff;
+    }
+
+    #stream-container {
+      width: 90vw;
+      max-width: 1800px;
+      height: auto;
+      display: grid;
+      gap: 10px;
+      grid-template-rows: repeat(2, 1fr);
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .stream {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-color: #1e1e1e;
+      border: 1px solid #444;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      transition: transform 0.2s;
+    }
+
+    .stream:hover {
+      transform: scale(1.02);
+    }
+
+    .stream video {
+      width: 100%;
+      height: auto;
+      border-radius: 10px 10px 0 0;
+    }
+
+    .stream-name {
+      text-align: center;
+      font-size: 16px;
+      font-weight: bold;
+      margin: 10px 0;
+      color: #e0e0e0;
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      margin: 20px 0;
+    }
+
+    .page-button, .nav-button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 12px 20px;
+      cursor: pointer;
+      margin: 0 5px;
+      transition: background-color 0.3s;
+      font-size: 16px;
+    }
+
+    .page-button:hover, .nav-button:hover {
+      background-color: #0056b3;
+    }
+
+    .page-button:disabled {
+      background-color: #555;
+      cursor: not-allowed;
+    }
+
+    .video-container {
+      position: relative;
+    }
+
+    .fullscreen-button {
+      background-color: #020202; 
+      color: white; 
+      border: none; 
+      border-radius: 5px; 
+      padding: 8px 12px;
+      cursor: pointer; 
+      position: absolute; 
+      bottom: 10px; 
+      right: 10px; 
+      transition: background-color 0.3s; 
+      font-size: 14px; 
+    }
+
+    .fullscreen-button:hover {
+      background-color: #393939;
+    }
+
+    .error-message {
+      color: red;
+      font-size: 18px;
+      text-align: center;
+      margin: 20px;
+    }
+
+    /* Dropdown styling */
+    #page-select {
+      padding: 8px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #ffffff;
+      margin-left: 10px; /* Space between button and dropdown */
+    }
+  </style>
+</head>
+<body>
+  <div id="stream-container"></div>
+  <div class="pagination">
+    <button class="nav-button" id="prev-button">Previous</button>
+    <button class="nav-button" id="next-button">Next</button>
+    <select id="page-select"></select>
+  </div>
+
+  <div class="timer-container">
+    <label class="timer-label">Timer in (s):</label>
+    <input type="number" id="timer-input" class="timer-input" placeholder="s" min="1" />
+  </div>
+
+  <script src="https://unpkg.byted-static.com/xgplayer/3.0.10/dist/index.min.js"></script>
+  <script src="https://unpkg.byted-static.com/xgplayer-flv/3.0.10/dist/index.min.js"></script>
+  <script>
+    const layout = { rows: 1, columns: 2 };
+    const streamsPerPage = layout.rows * layout.columns;
+    let currentPage = 0;
+    let streams = [];
+    let timerInterval;
+
+    function getUrlParameter(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+
+    async function fetchStreams(projectId) {
+      if (!projectId) {
+        displayError("Project ID is missing in the URL.");
+        return;
+      }
+
+      try {
+        const response = await fetch(`https://script.google.com/macros/s/AKfycbykuxu6mnhn3V_K5Zr7bAjiiFfGlADM6y6Ccb90CVLyaV0AVacYpxS4fFz5lEyoaArueg/exec?projectid=${projectId}`);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        streams = data.map(stream => ({
+          id: stream.uuid,
+          name: stream.streamname,
+          url: stream.url,
+          show: stream.show === 1
+        }));
+        renderStreams();
+        updatePagination();
+      } catch (error) {
+        displayError('Fetch error: ' + error.message);
+      }
+    }
+
+    function displayError(message) {
+      const container = document.getElementById("stream-container");
+      container.innerHTML = `<div class="error-message">${message}</div>`;
+    }
+
+    function renderStreams() {
+      const container = document.getElementById("stream-container");
+      container.innerHTML = "";
+
+      const visibleStreams = streams.filter(stream => stream.show);
+      const startIndex = currentPage * streamsPerPage;
+      const streamsToDisplay = visibleStreams.slice(startIndex, startIndex + streamsPerPage);
+
+      streamsToDisplay.forEach(stream => {
+        const streamDiv = document.createElement("div");
+        streamDiv.className = "stream";
+
+        const streamName = document.createElement("div");
+        streamName.className = "stream-name";
+        streamName.textContent = stream.name;
+
+        const videoContainer = document.createElement("div");
+        videoContainer.className = "video-container";
+        videoContainer.id = stream.id;
+
+        const fullscreenButton = document.createElement("button");
+        fullscreenButton.className = "fullscreen-button";
+        fullscreenButton.textContent = "[ ]";
+
+        fullscreenButton.addEventListener("click", () => {
+          if (videoContainer.requestFullscreen) {
+            videoContainer.requestFullscreen();
+          }
+        });
+
+        streamDiv.appendChild(streamName);
+        streamDiv.appendChild(videoContainer);
+        videoContainer.appendChild(fullscreenButton);
+        container.appendChild(streamDiv);
+
+        const config = {
+          id: stream.id,
+          url: stream.url,
+          playsinline: true,
+          isLive: true,
+          autoplay: true,
+          fluid: true,
+          volume: 0,
+          plugins: [FlvPlayer],
+          controls: false
+        };
+
+        new Player(config);
+      });
+    }
+
+    function updatePagination() {
+      const visibleStreams = streams.filter(stream => stream.show);
+      const totalPages = Math.ceil(visibleStreams.length / streamsPerPage);
+
+      const pageSelect = document.getElementById("page-select");
+      pageSelect.innerHTML = ""; // Clear existing options
+
+      for (let i = 0; i < totalPages; i++) {
+        const option = document.createElement("option");
+        option.value = i;
+        option.textContent = (i + 1);
+        pageSelect.appendChild(option);
+      }
+
+      pageSelect.value = currentPage;
+
+      document.getElementById("prev-button").disabled = currentPage === 0;
+      document.getElementById("next-button").disabled = currentPage === totalPages - 1;
+
+      pageSelect.onchange = (event) => {
+        currentPage = parseInt(event.target.value, 10);
+        renderStreams();
+        updatePagination();
+      };
+    }
+
+    document.getElementById("prev-button").onclick = () => {
+      if (currentPage > 0) {
+        currentPage--;
+        renderStreams();
+        updatePagination();
+      }
+    };
+
+    document.getElementById("next-button").onclick = () => {
+      const totalPages = Math.ceil(streams.filter(stream => stream.show).length / streamsPerPage);
+      if (currentPage < totalPages - 1) {
+        currentPage++;
+        renderStreams();
+        updatePagination();
+      }
+    };
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      const interval = parseInt(document.getElementById("timer-input").value, 10) * 1000;
+
+      if (interval > 0) {
+        timerInterval = setInterval(() => {
+          const totalPages = Math.ceil(streams.filter(stream => stream.show).length / streamsPerPage);
+          if (currentPage < totalPages - 1) {
+            currentPage++;
+          } else {
+            currentPage = 0;
+          }
+          renderStreams();
+          updatePagination();
+        }, interval);
+      }
+    }
+
+    document.getElementById("timer-input").addEventListener("change", startTimer);
+
+    const projectId = getUrlParameter("projectid");
+    fetchStreams(projectId);
+  </script>
+</body>
+</html>
