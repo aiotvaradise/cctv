@@ -16,12 +16,13 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background-color: #121212;
+      background-color: #121212; /* Dark background */
       font-family: 'Arial', sans-serif;
       padding: 10px;
       position: relative;
     }
 
+    /* Timer container styling */
     .timer-container {
       position: absolute;
       left: 5vw;
@@ -30,11 +31,13 @@
       align-items: center;
     }
 
+    /* Timer label styling */
     .timer-label {
       color: white;
       margin-right: 5px;
     }
 
+    /* Timer input styling */
     .timer-input {
       padding: 5px;
       font-size: 12px;
@@ -44,6 +47,7 @@
       background-color: #ffffff;
     }
 
+    /* Stream container styling */
     #stream-container {
       width: 90vw;
       max-width: 1800px;
@@ -54,6 +58,7 @@
       grid-template-columns: repeat(3, 1fr);
     }
 
+    /* Individual stream card styling */
     .stream {
       display: flex;
       flex-direction: column;
@@ -67,16 +72,19 @@
       transition: transform 0.2s;
     }
 
+    /* Scale effect on hover */
     .stream:hover {
       transform: scale(1.02);
     }
 
+    /* Video styling */
     .stream video {
       width: 100%;
       height: auto;
       border-radius: 10px 10px 0 0;
     }
 
+    /* Stream name styling */
     .stream-name {
       text-align: center;
       font-size: 16px;
@@ -85,12 +93,14 @@
       color: #e0e0e0;
     }
 
+    /* Pagination container styling */
     .pagination {
       display: flex;
       align-items: center;
       margin: 20px 0;
     }
 
+    /* Button styling */
     .page-button, .nav-button {
       background-color: #007bff;
       color: white;
@@ -103,19 +113,23 @@
       font-size: 16px;
     }
 
+    /* Button hover effect */
     .page-button:hover, .nav-button:hover {
       background-color: #0056b3;
     }
 
+    /* Disabled button styling */
     .page-button:disabled {
       background-color: #555;
       cursor: not-allowed;
     }
 
+    /* Video container styling */
     .video-container {
       position: relative;
     }
 
+    /* Fullscreen button styling */
     .fullscreen-button {
       background-color: #020202; 
       color: white; 
@@ -130,10 +144,12 @@
       font-size: 14px; 
     }
 
+    /* Fullscreen button hover effect */
     .fullscreen-button:hover {
       background-color: #393939;
     }
 
+    /* Error message styling */
     .error-message {
       color: red;
       font-size: 18px;
@@ -153,35 +169,37 @@
   </style>
 </head>
 <body>
-  <div id="stream-container"></div>
+  <div id="stream-container"></div> <!-- Container for streaming videos -->
   <div class="pagination">
-    <button class="nav-button" id="prev-button">Previous</button>
-    <button class="nav-button" id="next-button">Next</button>
-    <select id="page-select"></select>
+    <button class="nav-button" id="prev-button">Previous</button> <!-- Previous page button -->
+    <button class="nav-button" id="next-button">Next</button> <!-- Next page button -->
+    <select id="page-select"></select> <!-- Dropdown for page selection -->
   </div>
 
   <div class="timer-container">
     <label class="timer-label">Timer in (s):</label>
-    <input type="number" id="timer-input" class="timer-input" placeholder="s" min="1" />
+    <input type="number" id="timer-input" class="timer-input" placeholder="s" min="1" /> <!-- Timer input -->
   </div>
 
   <script src="https://unpkg.byted-static.com/xgplayer/3.0.10/dist/index.min.js"></script>
   <script src="https://unpkg.byted-static.com/xgplayer-flv/3.0.10/dist/index.min.js"></script>
   <script>
-    const layout = { rows: 2, columns: 3 };
-    const streamsPerPage = layout.rows * layout.columns;
-    let currentPage = 0;
-    let streams = [];
-    let timerInterval;
+    const layout = { rows: 2, columns: 3 }; // Layout configuration for streams
+    const streamsPerPage = layout.rows * layout.columns; // Calculate streams per page
+    let currentPage = 0; // Current page index
+    let streams = []; // Array to hold stream data
+    let timerInterval; // Timer interval reference
 
+    // Function to get URL parameters
     function getUrlParameter(name) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(name);
     }
 
+    // Function to fetch streams based on project ID
     async function fetchStreams(projectId) {
       if (!projectId) {
-        displayError("Project ID is missing in the URL.");
+        displayError("Project ID is missing in the URL."); // Display error if no project ID
         return;
       }
 
@@ -195,21 +213,23 @@
           url: stream.url,
           show: stream.show === 1
         }));
-        renderStreams();
-        updatePagination();
+        renderStreams(); // Render streams after fetching
+        updatePagination(); // Update pagination after fetching
       } catch (error) {
-        displayError('Fetch error: ' + error.message);
+        displayError('Fetch error: ' + error.message); // Display fetch error
       }
     }
 
+    // Function to display error messages
     function displayError(message) {
       const container = document.getElementById("stream-container");
       container.innerHTML = `<div class="error-message">${message}</div>`;
     }
 
+    // Function to render streams in the container
     function renderStreams() {
       const container = document.getElementById("stream-container");
-      container.innerHTML = "";
+      container.innerHTML = ""; // Clear existing streams
 
       const visibleStreams = streams.filter(stream => stream.show);
       const startIndex = currentPage * streamsPerPage;
@@ -221,7 +241,7 @@
 
         const streamName = document.createElement("div");
         streamName.className = "stream-name";
-        streamName.textContent = stream.name;
+        streamName.textContent = stream.name; // Set stream name
 
         const videoContainer = document.createElement("div");
         videoContainer.className = "video-container";
@@ -229,19 +249,21 @@
 
         const fullscreenButton = document.createElement("button");
         fullscreenButton.className = "fullscreen-button";
-        fullscreenButton.textContent = "[ ]";
+        fullscreenButton.textContent = "[ ]"; // Fullscreen button text
 
+        // Fullscreen functionality with new tab
         fullscreenButton.addEventListener("click", () => {
-          if (videoContainer.requestFullscreen) {
-            videoContainer.requestFullscreen();
-          }
+          const newTabUrl = `https://aiotvaradise.github.io/cctv/full_screen.html?streamUrl=${stream.url}`; // Set URL for the new tab
+          window.open(newTabUrl, '_blank'); // Open new tab with specified URL
         });
 
+        // Append elements to stream
         streamDiv.appendChild(streamName);
         streamDiv.appendChild(videoContainer);
         videoContainer.appendChild(fullscreenButton);
         container.appendChild(streamDiv);
 
+        // Player configuration
         const config = {
           id: stream.id,
           url: stream.url,
@@ -254,17 +276,19 @@
           controls: false
         };
 
-        new Player(config);
+        new Player(config); // Initialize video player
       });
     }
 
+    // Function to update pagination controls
     function updatePagination() {
       const visibleStreams = streams.filter(stream => stream.show);
-      const totalPages = Math.ceil(visibleStreams.length / streamsPerPage);
+      const totalPages = Math.ceil(visibleStreams.length / streamsPerPage); // Calculate total pages
 
       const pageSelect = document.getElementById("page-select");
       pageSelect.innerHTML = ""; // Clear existing options
 
+      // Populate dropdown with page options
       for (let i = 0; i < totalPages; i++) {
         const option = document.createElement("option");
         option.value = i;
@@ -272,11 +296,13 @@
         pageSelect.appendChild(option);
       }
 
-      pageSelect.value = currentPage;
+      pageSelect.value = currentPage; // Set current page in dropdown
 
+      // Disable buttons based on current page
       document.getElementById("prev-button").disabled = currentPage === 0;
       document.getElementById("next-button").disabled = currentPage === totalPages - 1;
 
+      // Change page on dropdown selection
       pageSelect.onchange = (event) => {
         currentPage = parseInt(event.target.value, 10);
         renderStreams();
@@ -284,6 +310,7 @@
       };
     }
 
+    // Previous button functionality
     document.getElementById("prev-button").onclick = () => {
       if (currentPage > 0) {
         currentPage--;
@@ -292,6 +319,7 @@
       }
     };
 
+    // Next button functionality
     document.getElementById("next-button").onclick = () => {
       const totalPages = Math.ceil(streams.filter(stream => stream.show).length / streamsPerPage);
       if (currentPage < totalPages - 1) {
@@ -301,6 +329,7 @@
       }
     };
 
+    // Function to start timer for automatic page transitions
     function startTimer() {
       clearInterval(timerInterval);
       const interval = parseInt(document.getElementById("timer-input").value, 10) * 1000;
@@ -311,7 +340,7 @@
           if (currentPage < totalPages - 1) {
             currentPage++;
           } else {
-            currentPage = 0;
+            currentPage = 0; // Reset to first page
           }
           renderStreams();
           updatePagination();
@@ -319,8 +348,10 @@
       }
     }
 
+    // Start timer on input change
     document.getElementById("timer-input").addEventListener("change", startTimer);
 
+    // Get project ID from URL and fetch streams
     const projectId = getUrlParameter("projectid");
     fetchStreams(projectId);
   </script>
