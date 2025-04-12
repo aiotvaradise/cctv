@@ -5,18 +5,17 @@
   <link rel="stylesheet" href="https://unpkg.byted-static.com/xgplayer/3.0.10/dist/index.min.css" />
   <style>
     body { 
-      margin: 0; 
-      padding: 0;
-      background: #000;
+      margin: 5%;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      overflow: hidden;
+      background: black; /* Background color */
     }
     #player-container {
-      width: 90vw;
-      height: 90vh;
+      width: 90%; /* Set desired width */
+      max-width: 800px; /* Max width for larger screens */
+      height: 90%; /* Set desired height */
     }
   </style>
 </head>
@@ -47,7 +46,8 @@
       loop: false,
       lang: 'en',
       whitelist: [''],
-      ignores: ['time', 'progress']
+      ignores: ['time', 'progress'],
+      controls: false // Disable controls
     };
     new Player(config);
   </script>
