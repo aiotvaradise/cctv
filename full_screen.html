@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Fullscreen of Video</title>
+  <link rel="stylesheet" href="https://unpkg.byted-static.com/xgplayer/3.0.10/dist/index.min.css" />
+  <style>
+    body { 
+      margin: 0; 
+      padding: 0;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    #player-container {
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <div id="player-container"></div>
+  <script src="https://unpkg.byted-static.com/xgplayer/3.0.10/dist/index.min.js"></script>
+  <script src="https://unpkg.byted-static.com/xgplayer-flv/3.0.10/dist/index.min.js"></script>
+  <script>
+    // Function to get URL parameters
+    function getUrlParameter(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+}
+
+    // Get the stream url from the URL
+    const streamUrl = getUrlParameter("streamUrl");
+
+    const config = {
+      id: 'player-container',
+      url: streamUrl,
+      playsinline: false,
+      isLive: true,
+      autoplay: true,
+      fluid: true,
+      volume: 0,
+      plugins: [FlvPlayer],
+      controls: true,
+      loop: false,
+      lang: 'en',
+      whitelist: [''],
+      ignores: ['time', 'progress']
+    };
+    new Player(config);
+  </script>
+</body>
+</html>
