@@ -182,11 +182,11 @@
   </div>
 
   <script>
-        // Refresh the page every 120 minutes (7200000 milliseconds)
-        setInterval(function() {
-            location.reload();
-        }, 7200000);
-    </script>
+    // Refresh the page every 120 minutes (7200000 milliseconds)
+    setInterval(function() {
+      location.reload();
+    }, 120000);
+  </script>
   
   <script src="https://unpkg.byted-static.com/xgplayer/3.0.10/dist/index.min.js"></script>
   <script src="https://unpkg.byted-static.com/xgplayer-flv/3.0.10/dist/index.min.js"></script>
@@ -358,8 +358,13 @@
     // Start timer on input change
     document.getElementById("timer-input").addEventListener("change", startTimer);
 
-    // Get project ID from URL and fetch streams
+    // Get project ID and timer from URL, then fetch streams
     const projectId = getUrlParameter("projectid");
+    const timerValue = getUrlParameter("timer-input");
+    if (timerValue) {
+      document.getElementById("timer-input").value = timerValue; // Set input value from URL
+      startTimer(); // Start timer if value is present
+    }
     fetchStreams(projectId);
   </script>
 </body>
