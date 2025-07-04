@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
   <meta name="referrer" content="no-referrer">
   <title>Varadise Streaming</title>
-  <link rel="stylesheet" href="https://unpkg.byted-static.com/xgplayer/3.0.10/dist/index.min.css" />
+  <link rel="stylesheet" href="https://unpkg.byted-static.com/xgplayer/3.0.21/dist/index.min.css" />
   <style type="text/css">
     /* Basic styling for the HTML and body */
     html, body {
@@ -181,8 +181,9 @@
     <input type="number" id="timer-input" class="timer-input" placeholder="s" min="1" /> <!-- Timer input -->
   </div>
 
-  <script src="https://unpkg.byted-static.com/xgplayer/3.0.10/dist/index.min.js"></script>
-  <script src="https://unpkg.byted-static.com/xgplayer-flv/3.0.10/dist/index.min.js"></script>
+  <script src="https://unpkg.byted-static.com/xgplayer/3.0.21/dist/index.min.js"></script>
+  <script src="https://unpkg.byted-static.com/xgplayer-flv/3.0.21/dist/index.min.js"></script>
+  <script src="https://unpkg.byted-static.com/xgplayer-hls/3.0.21/dist/index.min.js"></script>
   <script>
     const layout = { rows: 2, columns: 3 }; // Layout configuration for streams
     const streamsPerPage = layout.rows * layout.columns; // Calculate streams per page
@@ -226,6 +227,33 @@
       container.innerHTML = `<div class="error-message">${message}</div>`;
     }
 
+    // Function to determine which player to use based on stream URL
+    function getPlayerConfig(stream) {
+      const baseConfig = {
+        id: stream.id,
+        url: stream.url,
+        playsinline: true,
+        isLive: true,
+        autoplay: true,
+        fluid: true,
+        volume: 0,
+        controls: false
+      };
+
+      // Check if URL ends with .m3u8 for HLS
+      if (stream.url.toLowerCase().endsWith('.m3u8')) {
+        return {
+          ...baseConfig,
+          plugins: [HlsPlayer]
+        };
+      }
+      // Default to FLV player
+      return {
+        ...baseConfig,
+        plugins: [FlvPlayer]
+      };
+    }
+
     // Function to render streams in the container
     function renderStreams() {
       const container = document.getElementById("stream-container");
@@ -263,19 +291,8 @@
         videoContainer.appendChild(fullscreenButton);
         container.appendChild(streamDiv);
 
-        // Player configuration
-        const config = {
-          id: stream.id,
-          url: stream.url,
-          playsinline: true,
-          isLive: true,
-          autoplay: true,
-          fluid: true,
-          volume: 0,
-          plugins: [FlvPlayer],
-          controls: false
-        };
-
+        // Get appropriate player configuration
+        const config = getPlayerConfig(stream);
         new Player(config); // Initialize video player
       });
     }
