@@ -2,10 +2,11 @@
 <html>
 <head>
   <title>Fullscreen of Video</title>
-  <link rel="stylesheet" href="https://unpkg.byted-static.com/xgplayer/3.0.10/dist/index.min.css" />
+  <link rel="stylesheet" href="https://unpkg.byted-static.com/xgplayer/3.0.21/dist/index.min.css" />
   <style>
     body { 
-      margin: 5%;
+      margin: 0;
+      padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -13,27 +14,33 @@
       background: black; /* Background color */
     }
     #player-container {
-      width: 90%; /* Set desired width */
-      max-width: 800px; /* Max width for larger screens */
-      height: 90%; /* Set desired height */
+      width: 100vw; /* Full viewport width */
+      height: 100vh; /* Full viewport height */
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain; /* Maintain aspect ratio */
     }
   </style>
 </head>
 <body>
   <div id="player-container"></div>
-  <script src="https://unpkg.byted-static.com/xgplayer/3.0.10/dist/index.min.js"></script>
-  <script src="https://unpkg.byted-static.com/xgplayer-flv/3.0.10/dist/index.min.js"></script>
+  <script src="https://unpkg.byted-static.com/xgplayer/3.0.21/dist/index.min.js"></script>
+  <script src="https://unpkg.byted-static.com/xgplayer-flv/3.0.21/dist/index.min.js"></script>
+  <script src="https://unpkg.byted-static.com/xgplayer-hls/3.0.21/dist/index.min.js"></script>
   <script>
     // Function to get URL parameters
     function getUrlParameter(name) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(name);
-}
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
 
     // Get the stream url from the URL
     const streamUrl = getUrlParameter("streamUrl");
-
-    const config = {
+    
+    // Base configuration
+    const baseConfig = {
       id: 'player-container',
       url: streamUrl,
       playsinline: false,
@@ -41,15 +48,45 @@
       autoplay: true,
       fluid: true,
       volume: 0,
-      plugins: [FlvPlayer],
       controls: true,
       loop: false,
       lang: 'en',
       whitelist: [''],
-      ignores: ['time', 'progress'],
-      controls: false // Disable controls
+      ignores: ['time', 'progress']
     };
+
+    // Determine which player to use based on the stream URL extension
+    function getPlayerConfig() {
+      if (streamUrl.toLowerCase().endsWith('.m3u8')) {
+        return {
+          ...baseConfig,
+          plugins: [HlsPlayer]
+        };
+      }
+      // Default to FLV player
+      return {
+        ...baseConfig,
+        plugins: [FlvPlayer]
+      };
+    }
+
+    // Initialize the appropriate player
+    const config = getPlayerConfig();
     new Player(config);
+
+    // Make the player truly fullscreen (optional)
+    document.addEventListener('click', () => {
+      const videoElement = document.querySelector('video');
+      if (videoElement) {
+        if (videoElement.requestFullscreen) {
+          videoElement.requestFullscreen();
+        } else if (videoElement.webkitRequestFullscreen) {
+          videoElement.webkitRequestFullscreen();
+        } else if (videoElement.msRequestFullscreen) {
+          videoElement.msRequestFullscreen();
+        }
+      }
+    });
   </script>
 </body>
 </html>
