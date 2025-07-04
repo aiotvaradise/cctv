@@ -191,34 +191,42 @@
     let streams = []; // Array to hold stream data
     let timerInterval; // Timer interval reference
 
-    // Function to detect user's device type
+// Enhanced device detection function
     function detectDeviceType() {
       const userAgent = navigator.userAgent || navigator.vendor || window.opera;
       
-      // Check for iOS
+      // iOS detection
       if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
         return 'iOS';
       }
       
-      // Check for Android
+      // Android detection
       if (/android/i.test(userAgent)) {
         return 'Android';
       }
       
-      // Default to Windows/other
+      // Windows detection
+      if (/windows/i.test(userAgent)) {
+        return 'Windows';
+      }
+      
+      // Mac detection (treat as Windows for our purposes)
+      if (/macintosh/i.test(userAgent)) {
+        return 'Windows';
+      }
+      
+      // Default to Windows (for desktop browsers)
       return 'Windows';
     }
 
-    // Function to get URL parameters
     function getUrlParameter(name) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(name);
     }
 
-    // Function to fetch streams based on project ID
     async function fetchStreams(projectId) {
       if (!projectId) {
-        displayError("Project ID is missing in the URL."); // Display error if no project ID
+        displayError("Project ID is missing in the URL.");
         return;
       }
 
@@ -227,37 +235,43 @@
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
         
-        // Filter streams based on device type
         const deviceType = detectDeviceType();
         streams = data.map(stream => ({
           id: stream.uuid,
           name: stream.streamname,
           url: stream.url,
-          show: stream.show === 1
+          show: stream.show === 1,
+          // Add stream type detection
+          type: stream.url.toLowerCase().endsWith('.m3u8') ? 'hls' : 
+                stream.url.toLowerCase().endsWith('.flv') ? 'flv' : 'other'
         })).filter(stream => {
           if (!stream.show) return false;
+          
+          // Strict filtering based on device type
           if (deviceType === 'iOS') {
-            return stream.url.toLowerCase().endsWith('.m3u8');
+            return stream.type === 'hls'; // Only HLS for iOS
           } else {
-            // For Android/Windows, prefer FLV but fall back to HLS if FLV not available
-            return true;
+            return stream.type === 'flv'; // Only FLV for Android/Windows
           }
         });
         
-        renderStreams(); // Render streams after fetching
-        updatePagination(); // Update pagination after fetching
+        if (streams.length === 0) {
+          displayError(`No compatible streams found for your device (${deviceType}).`);
+          return;
+        }
+        
+        renderStreams();
+        updatePagination();
       } catch (error) {
-        displayError('Fetch error: ' + error.message); // Display fetch error
+        displayError('Fetch error: ' + error.message);
       }
     }
 
-    // Function to display error messages
     function displayError(message) {
       const container = document.getElementById("stream-container");
       container.innerHTML = `<div class="error-message">${message}</div>`;
     }
 
-    // Function to determine which player to use based on stream URL
     function getPlayerConfig(stream) {
       const baseConfig = {
         id: stream.id,
@@ -270,14 +284,12 @@
         controls: false
       };
 
-      // Check if URL ends with .m3u8 for HLS
       if (stream.url.toLowerCase().endsWith('.m3u8')) {
         return {
           ...baseConfig,
           plugins: [HlsPlayer]
         };
       }
-      // Default to FLV player
       return {
         ...baseConfig,
         plugins: [FlvPlayer]
