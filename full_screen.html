@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Fullscreen of Video</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fullscreen Video Player</title>
   <link rel="stylesheet" href="https://unpkg.byted-static.com/xgplayer/3.0.21/dist/index.min.css" />
   <style>
     body { 
@@ -11,16 +13,16 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background: black; /* Background color */
+      background: black;
     }
     #player-container {
-      width: 100vw; /* Full viewport width */
-      height: 100vh; /* Full viewport height */
+      width: 100vw;
+      height: 100vh;
     }
     video {
       width: 100%;
       height: 100%;
-      object-fit: contain; /* Maintain aspect ratio */
+      object-fit: contain;
     }
   </style>
 </head>
@@ -36,9 +38,15 @@
       return urlParams.get(name);
     }
 
-    // Get the stream url from the URL
+    // Get the stream URL from the URL
     const streamUrl = getUrlParameter("streamUrl");
     
+    if (streamUrl) {
+      // Mask the URL in the browser
+      const newUrl = window.location.origin + window.location.pathname;
+      history.replaceState(null, '', newUrl);
+    }
+
     // Base configuration
     const baseConfig = {
       id: 'player-container',
@@ -74,7 +82,7 @@
     const config = getPlayerConfig();
     new Player(config);
 
-    // Make the player truly fullscreen (optional)
+    // Make the player truly fullscreen on click
     document.addEventListener('click', () => {
       const videoElement = document.querySelector('video');
       if (videoElement) {
