@@ -50,6 +50,9 @@
     </div>
 
     <script>
+        // Disable right-click context menu
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        
         const sheetId = '1pLQF5Hb8XO4Ui2nhfVxPbeh5MDHO1KZDcPvH9z3LbTk'; // Replace with your Google Sheet ID
         const apiKey = 'AIzaSyB_oXMF43FSu7SbOr4PMNwKdeouXrNtxQ0'; // Replace with your Google Sheets API Key
         const projectId = new URLSearchParams(window.location.search).get('projectid');
@@ -98,3 +101,4 @@
     </script>
 </body>
 </html>
+
