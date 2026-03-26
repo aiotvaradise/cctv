@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Auto-Refresh</title>
+  <style>
+    html, body { height: 100%; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    #frameWrap { position: relative; height: 100%; }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #000;
+      display: block;
+    }
+    #status {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+      background: rgba(17, 24, 39, 0.85);
+      color: #e5e7eb;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      backdrop-filter: blur(4px);
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="frameWrap">
+    <div id="status">Next refresh in --s</div>
+    <iframe id="theFrame" title="Target content"></iframe>
+  </div>
+
+  <script>
+    function getQueryParam(name) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(name);
+    }
+
+    const rawUrl = getQueryParam("url");
+    const rawTimer = getQueryParam("timer");
+
+    const DEFAULT_TIMER_MS = 5000;
+
+    let timerMs = DEFAULT_TIMER_MS;
+    if (rawTimer != null && rawTimer.trim() !== "") {
+      const parsed = Number(rawTimer);
+      if (Number.isFinite(parsed) && parsed >= 250) {
+        timerMs = parsed;
+      }
+    }
+
+    let targetUrl = rawUrl;
+    if (targetUrl == null || targetUrl.trim() === "") {
+      targetUrl = "about:blank";
+    }
+
+    const iframe = document.getElementById("theFrame");
+    const statusEl = document.getElementById("status");
+
+    function loadIframe() {
+      iframe.src = targetUrl;
+    }
+
+    loadIframe();
+
+    let nextTick = Date.now() + timerMs;
+    function tick() {
+      const remainingMs = Math.max(0, nextTick - Date.now());
+      const remainingSeconds = Math.ceil(remainingMs / 1000);
+      statusEl.textContent = "Next refresh in " + remainingSeconds + "s";
+
+      if (Date.now() >= nextTick) {
+        loadIframe();
+        nextTick = Date.now() + timerMs;
+      }
+      requestAnimationFrame(tick);
+    }
+
+    requestAnimationFrame(tick);
+  </script>
+</body>
+</html>
